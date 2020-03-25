@@ -1,5 +1,5 @@
 
-## iCTC: The-molecular-basis-of-loss-of-smell-in-2019-nCoV-infected-individuals
+## The-molecular-basis-of-loss-of-smell-in-2019-nCoV-infected-individuals
 
 Among the prominent clinical symptoms such as fatigue, shortness of breath, fever, and cough, 2019-nCoV infected individuals 
 often experience hyposmia/anosmia (decrease or loss of sense of smell). Angiotensin I Converting Enzyme 2 (ACE2), a key host 
