@@ -21,7 +21,7 @@ of the ACE2 levels in the olfactory mucosa of 5 additional mammalian
 species revealed comparable expression patterns. In summary, our
 findings pinpoint the molecular rationale of loss of smell in 2019-nCoV
 infected patients.
-### to download data link is given below:
+### Required data can can be downloaded by the link:
 https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE139522
 
 ### Libraries need to be loaded before running iCTC.
