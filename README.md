@@ -24,7 +24,7 @@ infected patients.
 ### Required data can can be downloaded by the link:
 https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE139522
 
-### Libraries need to be loaded before running iCTC.
+### Libraries need to be loaded before running code
 
 ``` r
 library(Seurat)
