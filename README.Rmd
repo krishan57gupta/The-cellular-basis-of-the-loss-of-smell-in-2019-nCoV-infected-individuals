@@ -1,26 +1,20 @@
+---
+output: github_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 ## The-molecular-basis-of-loss-of-smell-in-2019-nCoV-infected-individuals
 
-Among the prominent clinical symptoms such as fatigue, shortness of
-breath, fever, and cough, 2019-nCoV infected individuals often
-experience hyposmia/anosmia (decrease or loss of sense of smell).
-Angiotensin I Converting Enzyme 2 (ACE2), a key host receptor has now
-been established as an important moiety for the entry of 2019-nCoV into
-the cell. A multitude of studies estimated the expression of ACE2 in
-multiple organs including heart, kidney, intestines, lungs, buccal
-cavity, etc. The ongoing medical examinations and the autopsy reports of
-the diseased individuals strongly corroborate these organ/tissue-level
-molecular insights. Olfactory mucosa harbors multiple functionally
-distinct cell types. Zeroing in on the cell lineages that underpin
-infection associated loss of olfaction may provide new leads for
-diagnostics/clinical management of 2019-nCoV infected individuals. Our
-pointed bioinformatic analysis of single expression profiles underscored
-selective expression of ACE2 in a subset of horizontal basal cells
-(HBCs) and microvillar cells (MVCs) of the olfactory mucosa. Inspection
-of the ACE2 levels in the olfactory mucosa of 5 additional mammalian
-species revealed comparable expression patterns. In summary, our
-findings pinpoint the molecular rationale of loss of smell in 2019-nCoV
-infected patients.
+Among the prominent clinical symptoms such as fatigue, shortness of breath, fever, and cough, 2019-nCoV infected individuals often experience hyposmia/anosmia (decrease or loss of sense of smell). Angiotensin I Converting Enzyme 2 (ACE2), a key host receptor has now been established as an important moiety for the entry of 2019-nCoV into the cell. A multitude of studies estimated the expression of ACE2 in multiple organs including heart, kidney, intestines, lungs, buccal cavity, etc. The ongoing medical examinations and the autopsy reports of the diseased individuals strongly corroborate these organ/tissue-level molecular insights. Olfactory mucosa harbors multiple functionally distinct cell types. Zeroing in on the cell lineages that underpin infection associated loss of olfaction may provide new leads for diagnostics/clinical management of 2019-nCoV infected individuals. Our pointed bioinformatic analysis of single expression profiles underscored selective expression of ACE2 in a subset of horizontal basal cells (HBCs) and microvillar cells (MVCs) of the olfactory mucosa.  Inspection of the ACE2 levels in the olfactory mucosa of 5 additional mammalian species revealed comparable expression patterns. In summary, our findings pinpoint the molecular rationale of loss of smell in 2019-nCoV infected patients.
+
 
 # Libraries need to be loaded before running iCTC.
 
