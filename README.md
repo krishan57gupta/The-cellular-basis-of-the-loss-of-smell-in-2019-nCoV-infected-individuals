@@ -31,13 +31,48 @@ infected patients.
 ``` r
 library(Seurat)
 library(ggplot2)
+library(ggpubr)
 ```
 
+### initilization
+
 ``` r
-folder="~/corona_project/plots_new/"
+folder="~/corona_project/plots_intigrate/"
+cell_type_genes=list("Bowman’s glands"=c("SOX9", "SOX10", "MUC5", "GPX3"),
+                     "olfactory HBCs"=c("TP63", "KRT5", "CXCL14", "SOX2", "MEG3"),
+                     "olfactory ensheathing glia"=c("S100B", "PLP1", "PMP2","MPZ", "ALX3"),
+                     "olfactory microvillar cells"=c("ASCL3", "CFTR", "HEPACAM2", "FOXL1"),
+                     "immature neurons"=c("GNG8", "OLIG2", "EBF2", "LHX2", "CBX8"),
+                     "mature neurons"=c("GNG13", "EBF2", "CBX8", "RTP1"),
+                     "GBCs"=c("HES6", "ASCL1", "CXCR4", "SOX2", "EZH2", "NEUROD1", "NEUROG1"),
+                     "sustentacular cells"=c("CYP2A13", "CYP2J2", "GPX6", "ERMN", "SOX2"))
+marker_genes=c("SOX9", "SOX10", "MUC5", "GPX3",
+               "TP63", "KRT5", "CXCL14", "SOX2", "MEG3",
+               "S100B", "PLP1", "PMP2","MPZ", "ALX3",
+               "ASCL3", "CFTR", "HEPACAM2", "FOXL1",
+               "GNG8", "OLIG2", "EBF2", "LHX2", "CBX8",
+               "GNG13", "EBF2", "CBX8", "RTP1",
+               "HES6", "ASCL1", "CXCR4", "SOX2", "EZH2", "NEUROD1", "NEUROG1",
+               "CYP2A13", "CYP2J2", "GPX6", "ERMN", "SOX2")
+cell_type_names=c("Bowman’s glands",
+                  "olfactory HBCs",
+                  "olfactory ensheathing glia",
+                  "olfactory microvillar cells",
+                  "immature neurons",
+                  "mature neurons",
+                  "GBCs",
+                  "sustentacular cells")
+gene_path=c("LNPEP", "ACE", "CD143","PRCP","CTSG",
+            "PREP", "KLK1_2","CMA1","REN", "MME",
+            "THOP1","NLN","AGTR1","AGTR2","MAS1",
+            " MRGPRDCPA3","ACE2","AGT","ANPEP","ENPEP","CTSA","ATP6AP2")
+```
+
+\#\#\#intigration and batch effect removing using Seurat
+
+``` r
 batch_list=list("P2","P3")
 batch_data_list=list("P2"=1,"P3"=1)
-sce_3_1_1_5000_23_new=list("1","2")
 for( i in 1:length(batch_list))
 {
   print(batch_list[[i]])
@@ -47,149 +82,151 @@ for( i in 1:length(batch_list))
   s_object <- subset(s_object, subset = nFeature_RNA >100 & nFeature_RNA <8000 & percent.mt <10)
   s_object@meta.data[, "run"] <- batch_list[i]
   s_object=NormalizeData(s_object)
-  batch_data_list[[i]]=FindVariableFeatures(s_object, selection.method = "dispersion", nfeatures =5000)
-  run.combined <- ScaleData(batch_data_list[[i]], verbose = FALSE)
-  run.combined <- RunPCA(run.combined, npcs = 30, verbose = FALSE)
-  # t-SNE and Clustering
-  run.combined <- RunUMAP(run.combined, reduction = "pca", dims = 1:30)
-  run.combined <- FindNeighbors(run.combined, reduction = "pca", dims = 1:30)
-  sce_3_1_1_5000_23_new[[i]] <- FindClusters(run.combined, resolution = 0.5)
+  batch_data_list[[i]]=FindVariableFeatures(s_object, selection.method = "vst", nfeatures =5000)
 }
-p2<-RenameIdents(sce_3_1_1_5000_23_new[[1]],`0`="Fibroblasts", `1`="CD8T cells",`2`="Pericytes", `3`="Olfactory HBCs", `4`="Pericytes",
-                 `5`="Vascular Smooth Muscle cells", `6`="Macrophages", `7`="Subtentacular Cells", `8`="Neuron Cells",
-                 `9`="Plasma Cells", `10`="Bowman's Gland", `11`="Bowman's Gland", `12`="Respiratory HBC Cells",
-                 `13`="Olfactory Ensheathing Glia", `14`="Dendritic cells", `15`="Monocytes", `16`="Subtentacular Cells", 
-                 `17`="Natural Killer cells", `18`="Fibroblasts", `19`="Mast Cells", `20`="Fibroblasts", `21`="Olfactory Progenator Cells",
-                 `22`="GBCs", `23`="Pericytes" )
-p3<-RenameIdents(sce_3_1_1_5000_23_new[[2]],`0`="Pericytes", `1`="Fibroblasts",`2`="CD8T cells", `3`="Vascular Smooth Muscle cells",
-                 `4`="Plasma Cells", `5`="Vascular Smooth Muscle cells", `6`="Pericytes", `7`="Olfactory HBCs",
-                 `8`="CD4T Cells", `9`="B Cells", `10`="Bowman's Gland", `11`="Olfactory HBCs", `12`="Immature Neurons",
-                 `13`="Olfactory Microvillar Cells", `14`="Natural Killer cells", `15`="Subtentacular Cells", `16`="Monocytes", 
-                 `17`="Subtentacular Cells", `18`="Dendritic cells", `19`="Olfactory Ensheathing Glia", `20`="GBCs",
-                 `21`="Mature Neurons", `22`="Plasma Cells", `23`="Macrophages" ,`24`="Mast Cells")
+batch_data_list
+saveRDS(batch_data_list,"~/corona_project/batch_data_list_5000_23.rds")
+set.seed(1)
+run.anchors <- FindIntegrationAnchors(object.list = batch_data_list, dims = 1:30,anchor.features = 5000)
+a=run.anchors
+run.combined <- IntegrateData(anchorset = run.anchors, dims = 1:30)
+b=run.combined
+sce_3_1_1_before=run.combined
+saveRDS(sce_3_1_1_before,"~/corona_project/sce_3_1_1_before_5000_23.rds")
+sce_3_1_1_before=readRDS("~/corona_project/sce_3_1_1_before_5000_23.rds")
+```
 
+### Dim reduction and clustering
 
+``` r
+DefaultAssay(run.combined) <- "integrated"
+run.combined <- ScaleData(run.combined, verbose = FALSE)
+run.combined <- RunPCA(run.combined, npcs = 30, verbose = FALSE)
+run.combined <- RunUMAP(run.combined, reduction = "pca", dims = 1:30)
+run.combined <- FindNeighbors(run.combined, reduction = "pca", dims = 1:30)
+run.combined <- FindClusters(run.combined, resolution = 0.5)
+```
 
+### cell-types annotation
 
-p2s=subset(p2, idents = names(table(Idents(p2)))[c(4,8,10,18,7)])
-p3s=subset(p3, idents = names(table(Idents(p3)))[c(17,18,10,13,11,6,9)])
-
-a=table(Seurat::Idents(p2s)[colnames(p2s[,as.matrix(p2s@assays$RNA["ACE2",])>0])])
-a=a*100/sum(a)
-df=data.frame(cell_type=names(a),count_percentage=a)
-ggplot(data=df, aes(x=cell_type, y=count_percentage.Freq)) +
-  geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
-a=table(Seurat::Idents(p3s)[colnames(p3s[,as.matrix(p3s@assays$RNA["ACE2",])>0])])
-a=a*100/sum(a)
-df=data.frame(cell_type=names(a),count_percentage=a)
-
-ggplot(data=df, aes(x=cell_type, y=count_percentage.Freq)) +
-  geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-
-
-DimPlot(p3s)
-
-DimPlot(p2s)
-
-
-genes_marker=c("ACE2",
-               "TP63","KRT5","CXCL14","SOX2","MEG3",
-               "ASCL3","CFTR","HEPACAM2","FOXL1",
-               "GNG8","OLIG2","EBF2","LHX2","CBX8",
-               "GNG13","EBF2,","CBX8","RTP1",
-               "HES6","ASCL1","CXCR4","SOX2","EZH2","NEUROD1","NEUROG1",
-               "CYP2A13","CYP2J2","GPX6","ERMN","SOX2",
-               "SOX9", "SOX10", "MUC5", "GPX3")
-genes_index=c(1,2,7,11,16,20,27,33,37)
-cells_marker=c("ACE2",names(table(Idents(p3s)))[c(1,4,3,7,6,5,2)])
-for(i in 1:length(cells_marker))
+``` r
+for(i in 1:length(marker_genes))
 {
+  if(i==3)
+    next
   print(i)
-  print(FeaturePlot(p2s, features = genes_marker[genes_index[i]:(genes_index[i+1]-1)],combine = FALSE,cols=c("lightgrey", "red")))
-  print(FeaturePlot(p3s, features = genes_marker[genes_index[i]:(genes_index[i+1]-1)],combine = FALSE,cols=c("lightgrey", "red")))
+  pdf(paste(folder,"others/vln_gene_markers_",marker_genes[i],".pdf",sep=""))
+  print(VlnPlot(run.combined, features = marker_genes[i],combine = FALSE))
+  dev.off()
+  svg(paste(folder,"others/vln_gene_markers_",marker_genes[i],".svg",sep=""))
+  print(VlnPlot(run.combined, features = marker_genes[i],combine = FALSE))
+  dev.off()
+  pdf(paste(folder,"others/feat_gene_markers_",marker_genes[i],".pdf",sep=""))
+  print(FeaturePlot(run.combined, features = marker_genes[i],combine = FALSE,cols=c("lightgrey", "red"),pt.size=2,order = TRUE))
+  dev.off()
+  svg(paste(folder,"others/feat_gene_markers_",marker_genes[i],".svg",sep=""))
+  print(FeaturePlot(run.combined, features = marker_genes[i],combine = FALSE,cols=c("lightgrey", "red"),pt.size=2,order = TRUE))
+  dev.off()
 }
+run.combined<-RenameIdents(run.combined,`13`="Immature neurons", `14`="Mature neurons", `3`="Olfactory HBCs",`19`="Olfactory microvillar cells",
+                   `5`="Bowman's gland", `16`="Olfactory ensheathing glia", `9`="Sustentacular cells",`20`="GBCs" )
+run.combined=subset(run.combined, idents = c("Immature neurons","Mature neurons","Olfactory HBCs","Olfactory microvillar cells","Bowman's gland",
+                          "Olfactory ensheathing glia","Sustentacular cells","GBCs"))
+```
 
+### Dim plot to show clusters clearly for each cell type
 
+``` r
+pdf(paste(folder,"tSNE_plots.pdf",sep=""))
+DimPlot(run.combined, reduction = "umap")
+dev.off()
+svg(paste(folder,"tSNe_plots.svg",sep=""))
+DimPlot(run.combined, reduction = "umap")
+dev.off()
+```
 
+### FeaturePlot to show the expression of ACE2 in each cell type
 
-p2sHBC=subset(p2, idents = names(table(Idents(p2)))[c(4)])
-pos=c(rep(1,length(colnames(p2sHBC[,as.matrix(p2sHBC@assays$RNA["ACE2",])>0]))))
-names(pos)=colnames(p2sHBC[,as.matrix(p2sHBC@assays$RNA["ACE2",])>0])
-neg=c(rep(-1,length(colnames(p2sHBC[,as.matrix(p2sHBC@assays$RNA["ACE2",])<=0]))))
-names(neg)=colnames(p2sHBC[,as.matrix(p2sHBC@assays$RNA["ACE2",])<=0])
+``` r
+pdf(paste(folder,paste("gene_markers_","ACE2",".pdf",sep="")))
+FeaturePlot(run.combined, features = "ACE2",combine = FALSE,cols=c("lightgrey", "red"),pt.size=2,order =TRUE)
+dev.off()
+svg(paste(folder,paste("gene_markers_","ACE2",".svg",sep="")))
+FeaturePlot(run.combined, features = "ACE2",combine = FALSE,cols=c("lightgrey", "red"),pt.size=2,order = TRUE)
+dev.off()
+```
+
+### Percentage of ACE2 expressed’s cells in each cell type
+
+``` r
+a=table(Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["ACE2",])>0])])
+print(sum(a))
+a=a*100/sum(a)
+df=data.frame(cell_type=names(a),count_percentage=a)
+svg(paste(folder,"bar_ACE2.svg",sep=""))
+ggplot(data=df, aes(x=cell_type, y=count_percentage.Freq, fill=cell_type)) + 
+  geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")
+dev.off()
+pdf(paste(folder,"bar_ACE2.pdf",sep=""))
+ggplot(data=df, aes(x=cell_type, y=count_percentage.Freq, fill=cell_type)) + 
+  geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")
+dev.off()
+dim(run.combined@assays$RNA)
+
+DefaultAssay(run.combined) <- "RNA"
+```
+
+### Finding differential expressed genes (HBC+;ACE2+) vs B (HBC+;ACE2-)
+
+``` r
+HBC=subset(run.combined, idents = "Olfactory HBCs")
+pos=c(rep(1,length(colnames(HBC[,as.matrix(HBC@assays$RNA["ACE2",])>0]))))
+names(pos)=colnames(HBC[,as.matrix(HBC@assays$RNA["ACE2",])>0])
+neg=c(rep(-1,length(colnames(HBC[,as.matrix(HBC@assays$RNA["ACE2",])<=0]))))
+names(neg)=colnames(HBC[,as.matrix(HBC@assays$RNA["ACE2",])<=0])
 pos_neg=c(pos,neg)
-sum(pos_neg[which(names(pos_neg)%in%rownames(p2sHBC@meta.data))]==pos_neg)
-p2sHBC=AddMetaData(
-  object = p2sHBC,
+sum(pos_neg[which(names(pos_neg)%in%rownames(HBC@meta.data))]==pos_neg)
+HBC=AddMetaData(
+  object = HBC,
   metadata = pos_neg,
   col.name = 'HBC'
 )
-Idents(p2sHBC)=pos_neg
-sum(pos_neg[which(names(pos_neg)%in%names(Idents(p2sHBC)))]==pos_neg)
-p2_HBC_genes=FindMarkers(p2sHBC, ident.1=1,ident.2=-1,test.use = "wilcox")
-p2_HBC_genes_a=rownames(p2_HBC_genes)[p2_HBC_genes[2]>1 & p2_HBC_genes[1]<0.05]
-p2_HBC_genes_b=rownames(p2_HBC_genes)[p2_HBC_genes[2]<-1 & p2_HBC_genes[1]<0.05]
-p2_HBC_genes_names=c(p2_HBC_genes_a,p2_HBC_genes_b)
+Idents(HBC)=pos_neg
+sum(pos_neg[which(names(pos_neg)%in%names(Idents(HBC)))]==pos_neg)
+HBC_genes=FindMarkers(HBC, ident.1=1,ident.2=-1,test.use = "wilcox")
+HBC_genes_a=rownames(HBC_genes)[HBC_genes[2]>1 & HBC_genes[1]<0.05]
+HBC_genes_b=rownames(HBC_genes)[HBC_genes[2]<-1 & HBC_genes[1]<0.05]
+HBC_genes_names=c(HBC_genes_a,HBC_genes_b)
+```
 
-p2sHBC_1 <- RunPCA(p2sHBC, npcs = 30, verbose = FALSE)
-p2sHBC_1 = RunUMAP(p2sHBC_1, reduction = "pca", dims = 1:30)
-p2sHBC_1=FindNeighbors(p2sHBC_1, reduction = "pca", dims = 1:30)
-p2sHBC_1=FindClusters(p2sHBC_1, resolution = 0.5)
-DimPlot(p2sHBC_1,pt.size = 1)
+### Finding differential expressed genes (Sustentacular+;ACE2+) vs B (Sustentacular+;ACE2-)
 
-
-
-p3sHBC=subset(p3, idents = names(table(Idents(p3)))[c(6)])
-pos=c(rep(1,length(colnames(p3sHBC[,as.matrix(p3sHBC@assays$RNA["ACE2",])>0]))))
-names(pos)=colnames(p3sHBC[,as.matrix(p3sHBC@assays$RNA["ACE2",])>0])
-neg=c(rep(-1,length(colnames(p3sHBC[,as.matrix(p3sHBC@assays$RNA["ACE2",])<=0]))))
-names(neg)=colnames(p3sHBC[,as.matrix(p3sHBC@assays$RNA["ACE2",])<=0])
+``` r
+Sustentacular=subset(run.combined, idents = "Sustentacular cells")
+pos=c(rep(1,length(colnames(Sustentacular[,as.matrix(Sustentacular@assays$RNA["ACE2",])>0]))))
+names(pos)=colnames(Sustentacular[,as.matrix(Sustentacular@assays$RNA["ACE2",])>0])
+neg=c(rep(-1,length(colnames(Sustentacular[,as.matrix(Sustentacular@assays$RNA["ACE2",])<=0]))))
+names(neg)=colnames(Sustentacular[,as.matrix(Sustentacular@assays$RNA["ACE2",])<=0])
 pos_neg=c(pos,neg)
-sum(pos_neg[which(names(pos_neg)%in%rownames(p3sHBC@meta.data))]==pos_neg)
-p3sHBC=AddMetaData(
-  object = p3sHBC,
+sum(pos_neg[which(names(pos_neg)%in%rownames(Sustentacular@meta.data))]==pos_neg)
+Sustentacular=AddMetaData(
+  object = Sustentacular,
   metadata = pos_neg,
-  col.name = 'HBC'
+  col.name = 'Sustentacular'
 )
-Idents(p3sHBC)=pos_neg
-sum(pos_neg[which(names(pos_neg)%in%names(Idents(p3sHBC)))]==pos_neg)
-p3_HBC_genes=FindMarkers(p3sHBC, ident.1=1,ident.2=-1,test.use = "wilcox")
-p3_HBC_genes_a=rownames(p3_HBC_genes)[p3_HBC_genes[2]>1 & p3_HBC_genes[1]<0.05]
-p3_HBC_genes_b=rownames(p3_HBC_genes)[p3_HBC_genes[2]<-1 & p3_HBC_genes[1]<0.05]
-p3_HBC_genes_names=c(p3_HBC_genes_a,p3_HBC_genes_b)
+Idents(Sustentacular)=pos_neg
+sum(pos_neg[which(names(pos_neg)%in%names(Idents(Sustentacular)))]==pos_neg)
+Sustentacular_genes=FindMarkers(Sustentacular, ident.1=1,ident.2=-1,test.use = "wilcox")
+Sustentacular_genes_a=rownames(Sustentacular_genes)[Sustentacular_genes[2]>1 & Sustentacular_genes[1]<0.05]
+Sustentacular_genes_b=rownames(Sustentacular_genes)[Sustentacular_genes[2]<-1 & Sustentacular_genes[1]<0.05]
+Sustentacular_genes_names=c(Sustentacular_genes_a,Sustentacular_genes_b)
+```
 
-p3sHBC_1 <- RunPCA(p3sHBC, npcs = 30, verbose = FALSE)
-p3sHBC_1 = RunUMAP(p3sHBC_1, reduction = "pca", dims = 1:30)
-p3sHBC_1=FindNeighbors(p3sHBC, reduction = "pca", dims = 1:30)
-p3sHBC_1=FindClusters(p3sHBC_1, resolution = 0.5)
-DimPlot(p3sHBC_1,pt.size = 1)
+### Saving DE genes
 
-
-
-
-p3sMicro=subset(p3, idents = names(table(Idents(p3)))[c(11)])
-pos=c(rep(1,length(colnames(p3sMicro[,as.matrix(p3sMicro@assays$RNA["ACE2",])>0]))))
-names(pos)=colnames(p3sMicro[,as.matrix(p3sMicro@assays$RNA["ACE2",])>0])
-neg=c(rep(-1,length(colnames(p3sMicro[,as.matrix(p3sMicro@assays$RNA["ACE2",])<=0]))))
-names(neg)=colnames(p3sMicro[,as.matrix(p3sMicro@assays$RNA["ACE2",])<=0])
-pos_neg=c(pos,neg)
-sum(pos_neg[which(names(pos_neg)%in%rownames(p3sMicro@meta.data))]==pos_neg)
-p3sMicro=AddMetaData(
-  object = p3sMicro,
-  metadata = pos_neg,
-  col.name = 'Micro'
-)
-Idents(p3sMicro)=pos_neg
-sum(pos_neg[which(names(pos_neg)%in%names(Idents(p3sMicro)))]==pos_neg)
-p3_Micro_genes=FindMarkers(p3sMicro, ident.1=1,ident.2=-1,test.use = "wilcox")
-p3_Micro_genes_a=rownames(p3_Micro_genes)[p3_Micro_genes[2]>1 & p3_Micro_genes[1]<0.05]
-p3_Micro_genes_b=rownames(p3_Micro_genes)[p3_Micro_genes[2]<-1 & p3_Micro_genes[1]<0.05]
-p3_Micro_genes_names=c(p3_Micro_genes_a,p3_Micro_genes_b)
-
-p3sMicro_1 <- RunPCA(p3sMicro, npcs = 30, verbose = FALSE)
-p3sMicro_1 = RunUMAP(p3sMicro_1, reduction = "pca", dims = 1:30)
-p3sMicro_1=FindNeighbors(p3sMicro, reduction = "pca", dims = 1:30)
-p3sMicro_1=FindClusters(p3sMicro_1, resolution = 0.5)
-DimPlot(p3sMicro_1,pt.size = 1)
+``` r
+write.csv(HBC_genes_a,paste(folder,"HBC_genes_a.csv",sep=""))
+write.csv(HBC_genes_b,paste(folder,"HBC_genes_b.csv",sep=""))
+write.csv(Sustentacular_genes_a,paste(folder,"Sustentacular_genes_a.csv",sep=""))
+write.csv(Sustentacular_genes_b,paste(folder,"Sustentacular_genes_b.csv",sep=""))
 ```
