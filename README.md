@@ -20,11 +20,16 @@ selective expression of ACE2 in a subset of horizontal basal cells
 of the ACE2 levels in the olfactory mucosa of 5 additional mammalian
 species revealed comparable expression patterns. In summary, our
 findings pinpoint the molecular rationale of loss of smell in 2019-nCoV
-infected patients.
+infected
+patients.
 
 ### Required data can can be downloaded by the link:
 
 <https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE139522>
+
+### To have a look on figures with code,you can download html file link given below.
+
+<https://github.com/krishan57gupta/The-molecular-basis-of-loss-of-smell-in-2019-nCoV-infected-individuals>
 
 ### Libraries need to be loaded before running
 
@@ -68,7 +73,7 @@ gene_path=c("LNPEP", "ACE", "CD143","PRCP","CTSG",
             " MRGPRDCPA3","ACE2","AGT","ANPEP","ENPEP","CTSA","ATP6AP2")
 ```
 
-\#\#\#intigration and batch effect removing using Seurat
+### Intigration and batch effect removing using Seurat
 
 ``` r
 batch_list=list("P2","P3")
@@ -93,7 +98,6 @@ run.combined <- IntegrateData(anchorset = run.anchors, dims = 1:30)
 b=run.combined
 sce_3_1_1_before=run.combined
 saveRDS(sce_3_1_1_before,"~/corona_project/sce_3_1_1_before_5000_23.rds")
-sce_3_1_1_before=readRDS("~/corona_project/sce_3_1_1_before_5000_23.rds")
 ```
 
 ### Dim reduction and clustering
@@ -132,6 +136,8 @@ run.combined<-RenameIdents(run.combined,`13`="Immature neurons", `14`="Mature ne
                    `5`="Bowman's gland", `16`="Olfactory ensheathing glia", `9`="Sustentacular cells",`20`="GBCs" )
 run.combined=subset(run.combined, idents = c("Immature neurons","Mature neurons","Olfactory HBCs","Olfactory microvillar cells","Bowman's gland",
                           "Olfactory ensheathing glia","Sustentacular cells","GBCs"))
+sce_3_1_1_after=run.combined
+saveRDS(sce_3_1_1_after,"~/corona_project/sce_3_1_1_after_5000_23.rds")
 ```
 
 ### Dim plot to show clusters clearly for each cell type
