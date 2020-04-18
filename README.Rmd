@@ -40,6 +40,14 @@ cell_type_genes=list("Bowman’s glands"=c("SOX9", "SOX10", "MUC5", "GPX3"),
                      "mature neurons"=c("GNG13", "EBF2", "CBX8", "RTP1"),
                      "GBCs"=c("HES6", "ASCL1", "CXCR4", "SOX2", "EZH2", "NEUROD1", "NEUROG1"),
                      "sustentacular cells"=c("CYP2A13", "CYP2J2", "GPX6", "ERMN", "SOX2"))
+cell_type_genes_temp=list("Bowman’s glands"=c("SOX9", "GPX3"),
+                     "olfactory HBCs"=c("CXCL14", "MEG3"),
+                     "olfactory ensheathing glia"=c("S100B", "PLP1"),
+                     "olfactory microvillar cells"=c( "ASCL3", "HEPACAM2"),
+                     "immature neurons"=c("GNG8","OLIG2"),
+                     "mature neurons"=c("GNG13","RTP1"),
+                     "GBCs"=c("CXCR4", "SOX2"),
+                     "sustentacular cells"=c("CYP2A13", "ERMN"))
 marker_genes=c("SOX9", "SOX10", "MUC5", "GPX3",
                "TP63", "KRT5", "CXCL14", "SOX2", "MEG3",
                "S100B", "PLP1", "PMP2","MPZ", "ALX3",
@@ -48,6 +56,8 @@ marker_genes=c("SOX9", "SOX10", "MUC5", "GPX3",
                "GNG13", "EBF2", "CBX8", "RTP1",
                "HES6", "ASCL1", "CXCR4", "SOX2", "EZH2", "NEUROD1", "NEUROG1",
                "CYP2A13", "CYP2J2", "GPX6", "ERMN", "SOX2")
+marker_genes_temp=c("SOX9", "GPX3","CXCL14", "MEG3","S100B", "PLP1", "ASCL3", "HEPACAM2",
+                    "GNG8","OLIG2","GNG13","RTP1","CXCR4", "SOX2","CYP2A13", "ERMN")
 cell_type_names=c("Bowman’s glands",
                   "olfactory HBCs",
                   "olfactory ensheathing glia",
@@ -127,17 +137,14 @@ saveRDS(sce_3_1_1_after,"~/corona_project/sce_3_1_1_after_5000_23.rds")
 pdf(paste(folder,"tSNE_plots.pdf",sep=""))
 DimPlot(run.combined, reduction = "umap")
 dev.off()
-svg(paste(folder,"tSNe_plots.svg",sep=""))
-DimPlot(run.combined, reduction = "umap")
-dev.off()
 ```
-### FeaturePlot to show the expression of ACE2 in each cell type
+### FeaturePlot to show the expression of ACE2 and TMPRSS2 in each cell type
 ``` r
 pdf(paste(folder,paste("gene_markers_","ACE2",".pdf",sep="")))
 FeaturePlot(run.combined, features = "ACE2",combine = FALSE,cols=c("lightgrey", "red"),pt.size=2,order =TRUE)
 dev.off()
-svg(paste(folder,paste("gene_markers_","ACE2",".svg",sep="")))
-FeaturePlot(run.combined, features = "ACE2",combine = FALSE,cols=c("lightgrey", "red"),pt.size=2,order = TRUE)
+pdf(paste(folder,paste("gene_markers_","TMPRSS2",".pdf",sep="")))
+FeaturePlot(run.combined, features = "TMPRSS2",combine = FALSE,cols=c("lightgrey", "red"),pt.size=2,order = TRUE)
 dev.off()
 ```
 ### Percentage of ACE2 expressed's cells in each cell type
@@ -146,20 +153,62 @@ a=table(Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combin
 print(sum(a))
 a=a*100/sum(a)
 df=data.frame(cell_type=names(a),count_percentage=a)
-svg(paste(folder,"bar_ACE2.svg",sep=""))
-ggplot(data=df, aes(x=cell_type, y=count_percentage.Freq, fill=cell_type)) + 
-  geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")
-dev.off()
 pdf(paste(folder,"bar_ACE2.pdf",sep=""))
 ggplot(data=df, aes(x=cell_type, y=count_percentage.Freq, fill=cell_type)) + 
   geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")
 dev.off()
 dim(run.combined@assays$RNA)
-
-DefaultAssay(run.combined) <- "RNA"
+```
+### Percentage of TMPRSS2 expressed's cells in each cell type
+``` r
+a=table(Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["TMPRSS2",])>0])])
+print(sum(a))
+a=a*100/sum(a)
+df=data.frame(cell_type=names(a),count_percentage=a)
+pdf(paste(folder,"bar_TMPRSS2.pdf",sep=""))
+ggplot(data=df, aes(x=cell_type, y=count_percentage.Freq, fill=cell_type)) + 
+  geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")
+dev.off()
+dim(run.combined@assays$RNA)
+```
+### bar plot of union of both ACE2 and TMPRSS2
+``` r
+col_name_TMPRSS2=Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["TMPRSS2",])>0])]
+col_name_ACE2=Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["ACE2",])>0])]
+union_names=union(names(col_name_ACE2),names(col_name_TMPRSS2))
+union_cells=table(Seurat::Idents(run.combined)[union_names])
+TMPRSS2_cells=table(Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["TMPRSS2",])>0])])
+ACE2_cells=table(Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["ACE2",])>0])])
+new_data=data.frame("cells_percenrage"=c(((TMPRSS2_cells/union_cells)*100),((ACE2_cells/union_cells)*100)),
+                    genes=c(rep("TMPRSS2",length(TMPRSS2_cells)),rep("ACE2",length(ACE2_cells))),
+                    cell_types=c(names(TMPRSS2_cells),names(ACE2_cells)))
+pdf(paste(folder,"bar_TMPRSS2_ACE2.pdf",sep=""))
+ggplot(data=new_data, aes(x=cell_types, y=cells_percenrage, fill=genes)) + 
+  geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
+dev.off()
+```
+### with common cells also
+``` r
+common_names=intersect(names(col_name_ACE2),names(col_name_TMPRSS2))
+common_cells=table(Seurat::Idents(run.combined)[common_names])
+svg(paste(folder,"bar_TMPRSS2_ACE2.svg",sep=""))
+new_data=data.frame("cells_percenrage"=c(((TMPRSS2_cells/union_cells)*100),((ACE2_cells/union_cells)*100),((common_cells/union_cells)*100)),
+                    genes=c(rep("TMPRSS2",length(TMPRSS2_cells)),rep("ACE2",length(ACE2_cells)),rep("common",length(common_cells))),
+                    cell_types=c(names(TMPRSS2_cells),names(ACE2_cells),names(common_cells)))
+pdf(paste(folder,"bar_TMPRSS2_ACE2_commom.pdf",sep=""))
+ggplot(data=new_data, aes(x=cell_types, y=cells_percenrage, fill=genes)) + 
+  geom_bar(stat="identity") +  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
+dev.off()
+```
+### Dot plot cluster wise with padj values of ACE2 and TMPRSS2
+``` r
+pdf(paste(folder,"dot_TMPRSS2_ACE2.pdf",sep=""))
+DotPlot(run.combined,features = c("ACE2","TMPRSS2"),cols = c("lightgrey", "red",dot.scale = 10))
+dev.off()
 ```
 ### Finding differential expressed genes (HBC+;ACE2+) vs B (HBC+;ACE2-)
 ``` r
+DefaultAssay(run.combined) <- "RNA"
 HBC=subset(run.combined, idents = "Olfactory HBCs")
 pos=c(rep(1,length(colnames(HBC[,as.matrix(HBC@assays$RNA["ACE2",])>0]))))
 names(pos)=colnames(HBC[,as.matrix(HBC@assays$RNA["ACE2",])>0])
@@ -206,4 +255,68 @@ write.csv(HBC_genes_a,paste(folder,"HBC_genes_a.csv",sep=""))
 write.csv(HBC_genes_b,paste(folder,"HBC_genes_b.csv",sep=""))
 write.csv(Sustentacular_genes_a,paste(folder,"Sustentacular_genes_a.csv",sep=""))
 write.csv(Sustentacular_genes_b,paste(folder,"Sustentacular_genes_b.csv",sep=""))
+```
+
+## Supplementary figures
+### Do heat map
+``` r
+sce_3_1_1_after_5000_23 <- readRDS("~/corona_project/sce_3_1_1_after_5000_23.rds")
+cluster.averages <- AverageExpression(sce_3_1_1_after_5000_23, return.seurat = TRUE)
+DoHeatmap(sce_3_1_1_after_5000_23,features =c(marker_genes_temp),size = 3, draw.lines = FALSE )
+DoHeatmap(cluster.averages,features =c(marker_genes),size = 3, draw.lines = FALSE )
+```
+### Dim plot to show clusters clearly for each cell type
+``` r
+plot=list()
+for(i in 1:length(marker_genes_temp))
+{
+  print(i)
+  if(i %in% c(1,5,9))
+    plot[[i]]<-VlnPlot(sce_3_1_1_after_5000_23, features = marker_genes_temp[[i]]) +
+       NoLegend() +   theme(axis.title.x=element_blank(),
+                                                                 axis.text.x=element_blank(),
+                                                                 axis.ticks.x=element_blank(),
+                                                                 axis.line.x = element_blank())
+  if(i %in% c(14,15,16))
+    plot[[i]]<-VlnPlot(sce_3_1_1_after_5000_23, features = marker_genes_temp[[i]]) + 
+        NoLegend() +   theme(axis.title.y=element_blank(),
+                                                                 axis.text.y=element_blank(),
+                                                                 axis.ticks.y=element_blank(),
+                                                                 axis.line.y = element_blank())
+  if(i %in% c(13))
+    plot[[i]]<-VlnPlot(sce_3_1_1_after_5000_23, features = marker_genes_temp[[i]]) + 
+      NoLegend() 
+  if(i %in% c(2,3,4,6,7,8,10,11,12))
+    plot[[i]]<-VlnPlot(sce_3_1_1_after_5000_23, features = marker_genes_temp[[i]]) + 
+      NoLegend()+   theme(axis.title.x=element_blank(),
+                          axis.text.x=element_blank(),
+                          axis.ticks.x=element_blank(),
+                          axis.line.x = element_blank(),
+                          axis.title.y=element_blank(),
+                          axis.text.y=element_blank(),
+                          axis.ticks.y=element_blank(),
+                          axis.line.y = element_blank())
+  
+}
+cowplot::plot_grid(plotlist = plot,nrow=4,rel_heights = c(1,1,1,2))
+```
+### for FeaturePlot
+``` r
+plot=list()
+plot[[1]]=DimPlot(sce_3_1_1_after_5000_23, reduction = "umap",pt.size = 1,label=TRUE)+
+   labs(title = "") + NoAxes() + NoLegend()
+for(i in 1:length(marker_genes_temp))
+{
+  print(i)
+  plot[[i+1]]<-FeaturePlot(sce_3_1_1_after_5000_23, features = marker_genes_temp[[i]],cols=c("lightgrey", "red"),
+            pt.size=1,order = TRUE) +  NoLegend() + NoAxes()
+
+}
+AT=cowplot::plot_grid(plotlist = plot[c(3,4,5)],ncol=3)
+AB=cowplot::plot_grid(plotlist = plot[c(12,13,11)],ncol=3)
+AR=cowplot::plot_grid(plotlist = plot[c(6,7,8,9,10)],nrow=5)
+AL=cowplot::plot_grid(plotlist = plot[c(2,14,15,16,17)],nrow=5)
+AC=cowplot::plot_grid(plotlist = plot[c(1)],nrow=1)
+ATCB=cowplot::plot_grid(plotlist = list(AT,AC,AB),nrow=3,rel_heights = c(1,4,1))
+cowplot::plot_grid(plotlist = list(AL,ATCB,AR),ncol=3,rel_widths = c(1,2,1))
 ```
