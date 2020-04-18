@@ -27,6 +27,7 @@ https://github.com/krishan57gupta/The-molecular-basis-of-loss-of-smell-in-2019-n
 library(Seurat)
 library(ggplot2)
 library(ggpubr)
+library(cowplot)
 ```
 
 ### initilization 
