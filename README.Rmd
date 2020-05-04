@@ -11,13 +11,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-## The-molecular-basis-of-loss-of-smell-in-2019-nCoV-infected-individuals
+## The-cellular-basis-of-the-loss-of-smell-in-2019-nCoV-infected-individuals
 
-Among the prominent clinical symptoms such as fatigue, shortness of breath, fever, and cough, 2019-nCoV infected individuals often experience hyposmia/anosmia (decrease or loss of sense of smell). Angiotensin I Converting Enzyme 2 (ACE2), a key host receptor has now been established as an important moiety for the entry of 2019-nCoV into the cell. A multitude of studies estimated the expression of ACE2 in multiple organs including heart, kidney, intestines, lungs, buccal cavity, etc. The ongoing medical examinations and the autopsy reports of the diseased individuals strongly corroborate these organ/tissue-level molecular insights. Olfactory mucosa harbors multiple functionally distinct cell types. Zeroing in on the cell lineages that underpin infection associated loss of olfaction may provide new leads for diagnostics/clinical management of 2019-nCoV infected individuals. Our pointed bioinformatic analysis of single expression profiles underscored selective expression of ACE2 in a subset of horizontal basal cells (HBCs) and microvillar cells (MVCs) of the olfactory mucosa.  Inspection of the ACE2 levels in the olfactory mucosa of 5 additional mammalian species revealed comparable expression patterns. In summary, our findings pinpoint the molecular rationale of loss of smell in 2019-nCoV infected patients.
+A prominent clinical symptom of 2019-nCoV infection is hyposmia/anosmia (decrease or loss of sense of smell), along with general symptoms such as fatigue, shortness of breath, fever, and cough. The identity of the cell lineages that underpin infection associated with loss of olfaction could be critical for the diagnostics/clinical management of 2019-nCoV infected individuals. Angiotensin I Converting Enzyme 2 (ACE2), and Transmembrane protease serine 2 (TMPRSS2) are emerging as associated host receptors vital for viral entry. Accordingly, the ongoing medical examinations and the autopsy reports of the deceased individuals strongly corroborate with the organ/cell-type-specific expression of ACE2, TMPRSS2, and other putative viral entry-associated genes. To determine the cellular basis of anosmia upon 2019-nCoV infection, we employed a targeted bioinformatic analysis of single-cell expression profiles of human olfactory epithelium cell-types. Our results underscored selective expression of these viral entry-associated genes in a subset of sustentacular cells, Bowman’s gland cells, and stem cells of the olfactory epithelium. Co-expression analysis of ACE2 and TMPRSS2 and protein-protein interaction among the host and viral proteins elected regulatory cytoskeleton protein-enriched sustentacular cells as the most vulnerable cell-type of the olfactory epithelium. Furthermore, expression, structural and docking analyses of these viral-entry moieties revealed the potential risk of olfactory dysfunction in four additional mammalian species, revealing an evolutionarily conserved susceptibility. In summary, our findings suggest the molecular and cellular rationale of loss of smell in 2019-nCoV infected patients.
 ### Required data can can be downloaded by the link:
 https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE139522
 ### To have a look on figures with code,you can download html file link given below.
-https://github.com/krishan57gupta/The-molecular-basis-of-loss-of-smell-in-2019-nCoV-infected-individuals
+https://github.com/krishan57gupta/The-cellular-basis-of-the-loss-of-smell-in-2019-nCoV-infected-individuals
 
 ## Libraries need to be loaded before running
 ``` r
@@ -73,7 +73,7 @@ cell_type_names=c("Bowman’s glands",
                   "sustentacular cells")
 ```
 
-## Laoding paitent P2 and P3 matrices and formation of seurat object
+## Loading paitent P2 and P3 matrices and formation of Seurat object
 ``` r
 batch_list=list("P2","P3")
 batch_data_list=list("P2"=1,"P3"=1)
@@ -92,7 +92,7 @@ batch_data_list
 saveRDS(batch_data_list,"~/corona_project/batch_data_list_5000_23.rds")
 ```
 
-## Intigration and batch effect removing using Seurat
+## Integration and batch effect removing using Seurat
 ``` r
 set.seed(1)
 run.anchors <- FindIntegrationAnchors(object.list = batch_data_list, dims = 1:30,anchor.features = 5000)
