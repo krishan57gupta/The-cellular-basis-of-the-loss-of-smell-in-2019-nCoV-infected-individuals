@@ -152,9 +152,7 @@ saveRDS(sce_3_1_1_after,"~/corona_project/sce_3_1_1_after_5000_23.rds")
 
 ``` r
 sce_3_1_1_after_5000_23 <- readRDS("~/corona_project/sce_3_1_1_after_5000_23.rds")
-cluster.averages <- AverageExpression(sce_3_1_1_after_5000_23, return.seurat = TRUE)
 DoHeatmap(sce_3_1_1_after_5000_23,features =c(marker_genes_temp),size = 3, draw.lines = FALSE )
-DoHeatmap(cluster.averages,features =c(marker_genes_temp),size = 3, draw.lines = FALSE )
 ```
 
 ## Vln plots with all selected gene markers
@@ -446,62 +444,6 @@ count\_matrix
 
 ## Bar plots to show + expressed cells of some gene markers as shown beelow
 
-### Bar side plot of ACE2, TMPRSS2 and (ACE2 and TMPRSS2)
-
-``` r
-count=c(count_matrix["ACE2_count",],count_matrix["TMPRSS2_count",],count_matrix["intersect_of_ACE2_TMPRSS2_count",])
-count[count==0]<-1
-A_T_AT_df=data.frame("count"=count,"cell_markers"= names(count),
-                     "gene_markers"=c(rep("ACE2",8),rep("TMPRSS2",8),rep("Intersect (ACE2 and TMPRSS2)",8)))
-ggplot(data=A_T_AT_df, aes(x=cell_markers, y=count, fill=gene_markers,width=.7)) +
-  geom_bar(stat="identity", position=position_dodge())+
-  theme_minimal() + scale_fill_manual(values=c('red','green',"blue")) +
-  scale_y_continuous(trans='log10') +
-  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
-
-### Bar side plot of BSG, CTSL and (BSG and CTSL)
-
-``` r
-count=c(count_matrix["BSG_count",],count_matrix["CTSL_count",],count_matrix["intersect_of_BSG_CTSL_count",])
-count[count==0]<-1
-B_C_BC_df=data.frame("count"=count,"cell_markers"= names(count),
-                     "gene_markers"=c(rep("BSG",8),rep("CTSL",8),rep("Intersect (BSG and CTSL)",8)))
-ggplot(data=B_C_BC_df, aes(x=cell_markers, y=count, fill=gene_markers,width=.7)) +
-  geom_bar(stat="identity", position=position_dodge())+
-  theme_minimal() + scale_fill_manual(values=c('red','green',"blue")) +
-  scale_y_continuous(trans='log10') +
-  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
-
-### Bar side plot of BSG, CTSL and (BSG and CTSL)
-
-``` r
-count=c(count_matrix["ACE2_count",],count_matrix["CTSL_count",],count_matrix["intersect_of_ACE2_CTSL_count",])
-count[count==0]<-1
-A_C_AC_df=data.frame("count"=count,"cell_markers"= names(count),
-                     "gene_markers"=c(rep("ACE2",8),rep("CTSL",8),rep("Intersect (ACE2 and CTSL)",8)))
-ggplot(data=A_C_AC_df, aes(x=cell_markers, y=count, fill=gene_markers,width=.7)) +
-  geom_bar(stat="identity", position=position_dodge())+
-  theme_minimal() + scale_fill_manual(values=c('red','green',"blue")) +
-  scale_y_continuous(trans='log10') +
-  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
-
-### Bar side plot of BSG, TMPRSS2 and (BSG and TMPRSS2)
-
-``` r
-count=c(count_matrix["BSG_count",],count_matrix["TMPRSS2_count",],count_matrix["intersect_of_BSG_TMPRSS2_count",])
-count[count==0]<-1
-B_T_BT_df=data.frame("count"=count,"cell_markers"= names(count),
-                     "gene_markers"=c(rep("BSG",8),rep("TMPRSS2",8),rep("Intersect (BSG and TMPRSS2)",8)))
-ggplot(data=B_T_BT_df, aes(x=cell_markers, y=count, fill=gene_markers,width=.7)) +
-  geom_bar(stat="identity", position=position_dodge())+
-  theme_minimal() + scale_fill_manual(values=c('red','green',"blue")) +
-  scale_y_continuous(trans='log10') +
-  theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
-
 ### Bar stack plot of ACE2, TMPRSS2 and (ACE2 and TMPRSS2)
 
 ``` r
@@ -566,60 +508,7 @@ DefaultAssay(run.combined) <- "RNA"
 seurat_subset_list=list()
 p_val=0.05
 l_fold=1
-```
-
-### DE genes analysis on ACE2+ and ACE2-
-
-``` r
-gene_marker="ACE2"
-print(sort(count_matrix[1,]))
-selected_cells_type=sort(count_matrix[1,])
-selected_cells_type=selected_cells_type[selected_cells_type>2]
-de_methods=c("wilcox","MAST","bimod","t","negbinom","poisson","LR")
-for(k in de_methods)
-  for(i in 1:length(selected_cells_type))
-  {
-    print(paste(k,"_",i,sep=""))
-    seurat_subset=subset(run.combined, idents = names(selected_cells_type)[i])
-    positive_cells_name = colnames(seurat_subset[,(as.matrix(seurat_subset@assays$RNA[gene_marker,])>0)])
-    negative_cells_name = colnames(seurat_subset[,(as.matrix(seurat_subset@assays$RNA[gene_marker,])<=0)])
-    pos_cells=paste(gene_marker,"+",sep="")
-    neg_cells=paste(gene_marker,"-",sep="")
-    pos=c(rep(pos_cells,length(positive_cells_name)))
-    names(pos)=positive_cells_name
-    neg=c(rep(neg_cells,length(negative_cells_name)))
-    names(neg)=negative_cells_name
-    pos_neg=c(pos,neg)
-    print(paste("cells in seurat object after subsetting with ",names(selected_cells_type)[i]," = ",dim(seurat_subset)[2],sep=""))
-    print(paste(names(selected_cells_type)[i]," total cells = ",sum(pos_neg[which(names(pos_neg)%in%rownames(seurat_subset@meta.data))]==pos_neg),sep=""))
-    print(paste(pos_cells," cells = ",sum(pos_neg==pos_cells),sep=""))
-    print(paste(neg_cells," cells = ",sum(pos_neg==neg_cells),sep=""))
-    seurat_subset=AddMetaData(
-      object = seurat_subset,
-      metadata = pos_neg,
-      col.name = 'seurat_subset'
-    )
-    seurat_subset_list[[paste(names(selected_cells_type)[i],"_",gene_marker,sep="")]]<-seurat_subset
-    Idents(seurat_subset)<-pos_neg
-    seurat_subset_genes=FindMarkers(seurat_subset, ident.1=pos_cells,ident.2=neg_cells,test.use = k,min.cells.group=1)
-    print(seurat_subset_genes[1:2,])
-    seurat_subset_genes_up=rownames(seurat_subset_genes)[seurat_subset_genes$avg_logFC>l_fold & seurat_subset_genes$p_val<p_val]
-    seurat_subset_genes_down=rownames(seurat_subset_genes)[seurat_subset_genes$avg_logFC<(-l_fold) & seurat_subset_genes$p_val<p_val]
-    seurat_subset_genes_names=c(seurat_subset_genes_up,seurat_subset_genes_down)
-    print(paste(names(selected_cells_type)[i],"_",pos_cells," genes = ",length(seurat_subset_genes_up),
-                " and ",names(selected_cells_type)[i],"_",neg_cells," genes = ",length(seurat_subset_genes_down),sep=""))
-    DE_info=data.frame("log2FC"=as.numeric(seurat_subset_genes$avg_logFC),"p_val"=as.numeric(seurat_subset_genes$p_val))
-    lab=rownames(seurat_subset_genes)
-    print(EnhancedVolcano(DE_info,
-                          lab = lab,
-                          x = 'log2FC',
-                          y = 'p_val',
-                          xlim = c(-2, 2),
-                          title = names(selected_cells_type)[i],
-                          pCutoff = p_val,
-                          FCcutoff = l_fold,
-                          colAlpha = 1))
-  }
+de_methods=c("poisson")
 ```
 
 ### DE genes analysis on intersection of (ACE2 and TMPRSS2)+ and (ACE2 and TMPRSS2)-
@@ -687,27 +576,21 @@ mat<-sce_3_1_1_after_5000_23@assays$RNA@counts
 ### Cell filtering
 
 ``` r
-c_s <- Matrix::colSums(mat>=3)
-l1 = stats::quantile(c_s,probs = 0.001)
-l2 = stats::quantile(c_s,probs = 1)
-keep_cells = intersect(which(c_s>=l1), which(c_s<=l2))
-mat<-mat[,keep_cells]
+cells_sum <- Matrix::colSums(mat>=3)
+mat<-mat[,intersect(which(cells_sum>=stats::quantile(cells_sum,probs = 0.001)), which(cells_sum<=stats::quantile(cells_sum,probs = 1)))]
 ```
 
 ### Gene filtering
 
 ``` r
-r_s <- Matrix::rowSums(mat > 2)
-keep_genes = which(r_s > 3)
-mat<-mat[keep_genes,]
+mat<-mat[which(Matrix::rowSums(mat > 2) > 3),]
 ```
 
 ### Median normalization
 
 ``` r
-r_s<-Matrix::rowSums(t(mat))
-r_s_med<-stats::median(r_s)
-mat<-Matrix::t(t(mat)/(r_s/r_s_med))
+cells_sum<-Matrix::rowSums(t(mat))
+mat<-Matrix::t(t(mat)/(cells_sum/stats::median(cells_sum)))
 ```
 
 ### Loading media genes file and intersecting genes and filtering matrix common genes
@@ -729,7 +612,7 @@ print(sum(apply(seurat_RNA_mat,2,function(x) sum(x)==0)))
 print(dim(seurat_RNA_mat))
 ```
 
-### First psedo count 1 then log2 then zscore using scale function in R
+### First adding 1 (adding 1 to whole matrix, not only for zeros) then log2 then zscore using scale function in R
 
 ``` r
 seurat_RNA_mat<-scale(log2(seurat_RNA_mat+1),center = TRUE, scale = TRUE)
