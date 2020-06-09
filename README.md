@@ -618,31 +618,82 @@ print(sum(apply(seurat_RNA_mat,2,function(x) sum(x)==0)))
 print(dim(seurat_RNA_mat))
 ```
 
-### First adding 1 (adding 1 to whole matrix, not only for zeros) then log2 then zscore using scale function in R
+### \#\#\# First adding 1 (adding 1 to only zero, not only for zeros) then log2 then zscore
 
 ``` r
-seurat_RNA_mat<-scale(log2(seurat_RNA_mat+1),center = TRUE, scale = TRUE)
+seurat_RNA_mat[seurat_RNA_mat==0]=1
+seurat_RNA_mat<-log2(seurat_RNA_mat)
+seurat_RNA_mat<-t(apply(seurat_RNA_mat,1,function(x) x*mean(x)/sd(x)))
 ```
 
-### Stouffer score using corto package
+### Stouffer score and then boxplot for each cell type
 
 ``` r
-stouffer_score<- apply(seurat_RNA_mat,2,corto::stouffer)
+stouffer_score<- apply(seurat_RNA_mat,2,function(x) sum(x)/sqrt(length(x)))
 print(sum(is.na(stouffer_score)))
 cell_types<-Idents(sce_3_1_1_after_5000_23)[names(stouffer_score)]
 unique_cell_types=unique(cell_types)
 Stouffer_score_df<-data.frame("Stouffer_score"=stouffer_score, "cell_types"=cell_types)
-med=c()
-med_n=c()
-ct=unique(cell_types)
-for(i in ct)
-{
-  med = c(med,median(stouffer_score[cell_types==i]))
-  med_n = c(med_n,i)
-  
-}
-med_df=data.frame("cell_types"=med_n, "med"=med)
-ggplot(med_df, aes(x=cell_types, y=med, fill=cell_types)) +
-  geom_bar(stat="identity")+theme_minimal() +
+ggplot(Stouffer_score_df, aes(x=cell_types, y=Stouffer_score, fill=cell_types)) +
+  geom_boxplot(position=position_dodge(.2)) +
+  geom_jitter(shape=16, position=position_jitter(.1)) +
   theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### One sided wilcoxon test
+
+``` r
+p_val_stouffer_score=matrix(0,nrow=length(unique_cell_types),ncol=length(unique_cell_types))
+colnames(p_val_stouffer_score)=unique_cell_types
+rownames(p_val_stouffer_score)=unique_cell_types
+for (i in 1:dim(p_val_stouffer_score)[1])
+{
+  for (j in 1:dim(p_val_stouffer_score)[2])
+  {
+    print(paste(i,"_",j,sep=""))
+    a=stouffer_score[names(cell_types)[cell_types==unique_cell_types[i]]]
+    b=stouffer_score[names(cell_types)[cell_types==unique_cell_types[j]]]
+    p_val_stouffer_score[i,j]=wilcox.test(a,b,alternative = "greater")$p.value
+  }
+}
+p_val_stouffer_score
+```
+
+### Scatter plot and Pearson correlation with the average vectors from patient 2 and patient 3
+
+#### 5 average vector for patient 2 and 5 from patient 3 as “ACE2+”,“TMPRSS2+”,“BSG+”,“CTSL+”,“All\_cells”
+
+``` r
+sce_3_1_1_after_5000_23 <- readRDS("~/corona_project/sce_3_1_1_after_5000_23.rds")
+run=sce_3_1_1_after_5000_23@meta.data$run
+for(i in c("ACE2","TMPRSS2","BSG","CTSL","All"))
+{
+  print(i)
+  P2=sce_3_1_1_after_5000_23@assays$RNA@counts[,run=="P2"]
+  dim(P2)
+  if (i!="All")
+    P2=P2[,P2[i,]>0]
+  P2[P2==0]<-1
+  P2=t(apply(P2,1,function(x) log2(x)))
+  dim(P2)
+  P2=rowMeans(as.matrix(P2))
+  length(P2)
+  P3=sce_3_1_1_after_5000_23@assays$RNA@counts[,run=="P3"]
+  dim(P3)
+  if (i!="All")
+    P3=P3[,P3[i,]>0]
+  P3[P3==0]<-1
+  P3=t(apply(P3,1,function(x) log2(x)))
+  dim(P3)
+  P3=rowMeans(as.matrix(P3))
+  length(P3)
+  corr=cor(P2,P3,method="pearson")
+  df=data.frame("P2"=P2,"P3"=P3)
+  print(ggplot(df, aes(x=P2, y=P3)) + 
+    geom_point(shape=18, color="blue")+
+    geom_smooth(method=lm,  linetype="dashed",
+                color="darkred", fill="blue")+
+    ggtitle(paste("pearson correlation: ",corr,sep=""))+
+    xlab("Patient 2")+ylab("Patient 3")+theme_classic())
+}
 ```
