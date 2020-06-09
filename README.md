@@ -26,10 +26,10 @@ moieties revealed the potential risk of olfactory dysfunction in four
 additional mammalian species, revealing an evolutionarily conserved
 susceptibility. In summary, our findings suggest the molecular and
 cellular rationale of loss of smell in 2019-nCoV infected patients.
-\#\#\# Required data can can be downloaded by the link:
-<https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE139522> \#\#\# To
-have a look on figures with code,you can download html file link given
-below.
+
+### Required data can can be downloaded by the link:
+<https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE139522> 
+### To have a look on figures with code,you can download html file link given below.
 <https://github.com/krishan57gupta/The-cellular-basis-of-the-loss-of-smell-in-2019-nCoV-infected-individuals>
 
 ## Libraries need to be loaded before running
