@@ -55,7 +55,6 @@ library(EnhancedVolcano)
 set.seed(0)
 label_size=8
 point_size=1
-folder="~/corona_project/plots_intigrate/"
 cell_type_genes=list("Bowman’s glands"=c("SOX9", "SOX10", "GPX3"),
                      "olfactory HBCs"=c("TP63", "KRT5", "CXCL14", "SOX2", "MEG3"),
                      "olfactory ensheathing glia"=c("S100B", "PLP1", "PMP2","MPZ", "ALX3"),
