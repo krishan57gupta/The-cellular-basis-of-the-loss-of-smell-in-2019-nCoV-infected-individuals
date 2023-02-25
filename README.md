@@ -626,7 +626,7 @@ print(dim(seurat_RNA_mat))
 ``` r
 seurat_RNA_mat[seurat_RNA_mat==0]=1
 seurat_RNA_mat<-log2(seurat_RNA_mat)
-seurat_RNA_mat<-t(apply(seurat_RNA_mat,1,function(x) x*mean(x)/sd(x)))
+seurat_RNA_mat<-t(apply(seurat_RNA_mat,1,function(x) (x-mean(x))/sd(x)))
 ```
 
 ### Stouffer score and then boxplot for each cell type
