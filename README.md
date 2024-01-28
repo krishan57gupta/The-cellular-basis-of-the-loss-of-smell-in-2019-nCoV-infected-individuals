@@ -442,7 +442,7 @@ count_matrix[23,names(intersect_cells)]=intersect_cells
 
 ### Intersect of BSG, TMPRSS2 and CTSB
 
-\`\`\` r
+``` r
 col\_name\_TMPRSS2=Seurat::Idents(run.combined)\[colnames(run.combined\[,as.matrix(<run.combined@assays$RNA>\[“TMPRSS2”,\])\>0\])\]
 col\_name\_BSG=Seurat::Idents(run.combined)\[colnames(run.combined\[,as.matrix(<run.combined@assays$RNA>\[“BSG”,\])\>0\])\]
 col\_name\_CTSB=Seurat::Idents(run.combined)\[colnames(run.combined\[,as.matrix(<run.combined@assays$RNA>\[“CTSB”,\])\>0\])\]
@@ -451,8 +451,9 @@ intersect\_names=intersect(intersect\_names,names(col\_name\_CTSB))
 intersect\_cells=table(Seurat::Idents(run.combined)\[intersect\_names\])
 count\_matrix\[24,names(intersect\_cells)\]=intersect\_cells
 count\_matrix
+```
 
-## Bar plots to show + expressed cells of some gene markers as shown beelow
+## Bar plots to show + expressed cells of some gene markers as shown below
 
 ### Bar stack plot of ACE2, TMPRSS2 and (ACE2 and TMPRSS2)
 
