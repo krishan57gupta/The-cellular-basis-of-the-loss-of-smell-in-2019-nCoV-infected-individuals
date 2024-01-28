@@ -386,7 +386,7 @@ ggplot(data=new_data, aes(x=cell_types, y=cells_percenrage, fill=genes)) +
 
 ### Bar plot of intersect of both BSG and CTSL
 
-`r
+```r
 col_name_CTSL=Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["CTSL",])>0])]
 col_name_BSG=Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["BSG",])>0])]
 intersect_names=intersect(names(col_name_BSG),names(col_name_CTSL))
@@ -401,9 +401,10 @@ genes=c(rep("CTSL",length(CTSL_cells)),rep("BSG",length(BSG_cells))),
 cell_types=c(names(CTSL_cells),names(BSG_cells))) ggplot(data=new_data,
 aes(x=cell_types, y=cells_percenrage, fill=genes)) +
 geom_bar(stat="identity") + theme_classic()+ theme(axis.text.x =
-element_text(angle = 90, hjust = 1))` r \#\#\# Intersect of ACE2,
-TMPRSS2 and
-CTSL
+element_text(angle = 90, hjust = 1))
+```
+
+### Intersect of ACE2, TMPRSS2 and CTSL
 
 ``` r
 col_name_TMPRSS2=Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(run.combined@assays$RNA["TMPRSS2",])>0])]
