@@ -621,7 +621,7 @@ print(sum(apply(seurat_RNA_mat,2,function(x) sum(x)==0)))
 print(dim(seurat_RNA_mat))
 ```
 
-### \#\#\# First adding 1 (adding 1 to only zero, not only for zeros) then log2 then zscore
+### \#\#\# First adding 1 (adding 1 to only zero) then log2 then zscore
 
 ``` r
 seurat_RNA_mat[seurat_RNA_mat==0]=1
