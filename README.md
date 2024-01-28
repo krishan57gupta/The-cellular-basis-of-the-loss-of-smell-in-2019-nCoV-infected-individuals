@@ -443,14 +443,14 @@ count_matrix[23,names(intersect_cells)]=intersect_cells
 ### Intersect of BSG, TMPRSS2 and CTSB
 
 ``` r
-col\_name\_TMPRSS2=Seurat::Idents(run.combined)\[colnames(run.combined\[,as.matrix(<run.combined@assays$RNA>\[“TMPRSS2”,\])\>0\])\]
-col\_name\_BSG=Seurat::Idents(run.combined)\[colnames(run.combined\[,as.matrix(<run.combined@assays$RNA>\[“BSG”,\])\>0\])\]
-col\_name\_CTSB=Seurat::Idents(run.combined)\[colnames(run.combined\[,as.matrix(<run.combined@assays$RNA>\[“CTSB”,\])\>0\])\]
-intersect\_names=intersect(names(col\_name\_BSG),names(col\_name\_TMPRSS2))
-intersect\_names=intersect(intersect\_names,names(col\_name\_CTSB))
-intersect\_cells=table(Seurat::Idents(run.combined)\[intersect\_names\])
-count\_matrix\[24,names(intersect\_cells)\]=intersect\_cells
-count\_matrix
+col_name_TMPRSS2=Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(<run.combined@assays$RNA>[“TMPRSS2”,])>0])]
+col_name_BSG=Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(<run.combined@assays$RNA>[“BSG”,])>0])]
+col_name_CTSB=Seurat::Idents(run.combined)[colnames(run.combined[,as.matrix(<run.combined@assays$RNA>[“CTSB”,])>0])]
+intersect_names=intersect(names(col_name_BSG),names(col_name_TMPRSS2))
+intersect_names=intersect(intersect_names,names(col_name_CTSB))
+intersect_cells=table(Seurat::Idents(run.combined)[intersect_names])
+count_matrix[24,names(intersect_cells)]=intersect_cells
+count_matrix
 ```
 
 ## Bar plots to show + expressed cells of some gene markers as shown below
